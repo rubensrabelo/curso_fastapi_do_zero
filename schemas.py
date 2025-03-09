@@ -13,3 +13,7 @@ class UserPublic(BaseModel):
 
 class UserSchema(UserPublic):
     password: str
+
+
+class UserList(UserPublic):
+    users: list[UserPublic]

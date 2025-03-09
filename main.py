@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from starlette import status
 
-from schemas import Message, UserPublic, UserSchema
+from schemas import Message, UserPublic, UserSchema, UserList
 
 app = FastAPI()
 
@@ -29,3 +29,14 @@ def create_user(user: UserSchema):
     user_db.id = len(database) + 1
     database.append(user_db)
     return user_db
+
+
+@app.get(
+        "/users/",
+        status_code=status.HTTP_200_OK,
+        response_model=UserList
+)
+def read_all_users():
+    return {
+        "users": database
+    }
