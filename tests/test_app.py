@@ -1,20 +1,26 @@
 from http import HTTPStatus
-from fastapi.testclient import TestClient
-import sys
-import os
-
-sys.path.insert(
-    0,
-    os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    )
-
-from main import app  # noqa: E402
 
 
-def test_root_should_return_ok_and_hello_world():
-    client = TestClient(app)
-
+def test_root_should_return_ok_and_hello_world(client):
     response = client.get("/")
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {"Message": "Hello, world!"}
+    assert response.json() == {"message": "Hello, world!"}
+
+
+def test_create_user(client):
+    response = client.post(
+        "/users/",
+        json={
+            "username": "alice",
+            "email": "alice@example.com",
+            "password": "secret"
+        }
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json() == {
+        "username": "alice",
+        "email": "alice@example.com",
+        "id": 1
+    }
