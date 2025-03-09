@@ -15,5 +15,5 @@ class UserSchema(UserPublic):
     password: str
 
 
-class UserList(UserPublic):
+class UserList(BaseModel):
     users: list[UserPublic]

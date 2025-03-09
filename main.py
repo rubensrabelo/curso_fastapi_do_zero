@@ -36,7 +36,7 @@ def create_user(user: UserSchema):
         status_code=status.HTTP_200_OK,
         response_model=UserList
 )
-def read_all_users():
+def read_users():
     return {
         "users": database
     }
