@@ -42,6 +42,21 @@ def read_users():
     }
 
 
+@app.get(
+        "/users/{user_id}",
+        status_code=status.HTTP_200_OK,
+        response_model=UserPublic
+)
+def read_user(user_id: int):
+    if user_id > len(database) or user_id < 1:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    user_data = database[user_id - 1]
+    return user_data
+
+
 @app.put(
         "/users/{user_id}",
         status_code=status.HTTP_200_OK,
