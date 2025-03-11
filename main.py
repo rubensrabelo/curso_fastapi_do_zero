@@ -45,15 +45,15 @@ def read_users():
 @app.put(
         "/users/{user_id}",
         status_code=status.HTTP_200_OK,
-        response_model=UserSchema
+        response_model=UserPublic
 )
 def update_user(user_id: int, user: UserSchema):
-    if user_id > len(database) or user < 1:
+    if user_id > len(database) or user_id < 1:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    user_with_id = UserPublic(**user.model_dump())
-    user_with_id = user_id
+    user_with_id = UserSchema(**user.model_dump())
+    user_with_id.id = user_id
     database[user_id - 1] = user_with_id
     return user_with_id
