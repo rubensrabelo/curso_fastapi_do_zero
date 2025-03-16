@@ -9,6 +9,8 @@ from schemas import Message, UserPublic, UserSchema, UserList
 
 app = FastAPI()
 
+database = []
+
 
 @app.get(
         "/",

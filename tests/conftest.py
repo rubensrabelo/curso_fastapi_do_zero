@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from contextlib import contextmanager
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 from datetime import datetime
 import sys
 import os
@@ -13,17 +14,29 @@ sys.path.insert(
     )
 
 from main import app  # noqa: E402
+from database import get_session  # noqa: E402
 from models import table_registry  # noqa: E402
 
 
 @pytest.fixture
-def client():
-    return TestClient(app)
+def client(session):
+    def get_session_override():
+        return session
+
+    with TestClient(app) as client:
+        app.dependency_overrides[get_session] = get_session_override
+        yield client
+
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
 def session():
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool
+    )
     table_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
