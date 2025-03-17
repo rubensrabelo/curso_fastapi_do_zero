@@ -7,7 +7,7 @@ sys.path.insert(
     os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     )
 
-from models import UserPublic
+from models import UserPublic  # noqa: E402
 
 
 def test_root_should_return_ok_and_hello_world(client):
