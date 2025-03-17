@@ -1,6 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from starlette import status
 
 from database import get_session
@@ -100,14 +101,19 @@ def update_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
+    try:
+        db_user.username = user.username
+        db_user.password = user.password
+        db_user.email = user.email
 
-    db_user.username = user.username
-    db_user.password = user.password
-    db_user.email = user.email
-
-    session.commit()
-    session.refresh(db_user)
-    return db_user
+        session.commit()
+        session.refresh(db_user)
+        return db_user
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username or Email already exists"
+        )
 
 
 @app.delete(

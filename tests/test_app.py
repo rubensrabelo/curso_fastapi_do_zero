@@ -66,7 +66,7 @@ def test_404_for_read_user_by_id(client):
     assert response.json() == {"detail": "User not found"}
 
 
-def test_update_user(client):
+def test_update_user(client, user):
     response = client.put(
         "/users/1",
         json={
