@@ -96,7 +96,7 @@ def test_404_for_update(client):
     assert response.json() == {"detail": "User not found"}
 
 
-def test_delete_user(client):
+def test_delete_user(client, user):
     response = client.delete("/users/1")
 
     assert response.status_code == HTTPStatus.OK
