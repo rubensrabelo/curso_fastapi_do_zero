@@ -15,7 +15,7 @@ sys.path.insert(
 
 from main import app  # noqa: E402
 from database import get_session  # noqa: E402
-from models import table_registry  # noqa: E402
+from models import table_registry, User  # noqa: E402
 
 
 @pytest.fixture
@@ -63,3 +63,13 @@ def _mock_db_time(*, model, time=datetime(2025, 1, 1)):
 @pytest.fixture
 def mock_db_time():
     return _mock_db_time
+
+
+@pytest.fixture
+def user(session):
+    user = User(username='Teste', email='teste@test.com', password='testtest')
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user

@@ -1,4 +1,13 @@
 from http import HTTPStatus
+import sys
+import os
+
+sys.path.insert(
+    0,
+    os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    )
+
+from models import UserPublic
 
 
 def test_root_should_return_ok_and_hello_world(client):
@@ -28,17 +37,15 @@ def test_create_user(client):
 
 def test_read_users(client):
     response = client.get("/users/")
-
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        "users": [
-            {
-                "username": "alice",
-                "email": "alice@example.com",
-                "id": 1
-            }
-        ]
-    }
+    assert response.json() == {"users": []}
+
+
+def test_read_users_with_users(client, user):
+    user_schema = UserPublic.model_validate(user).model_dump()
+    response = client.get("/users/")
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {"users": [user_schema]}
 
 
 def test_read_user_by_id(client):
