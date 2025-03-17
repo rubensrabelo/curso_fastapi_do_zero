@@ -62,9 +62,12 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
         status_code=status.HTTP_200_OK,
         response_model=UserList
 )
-def read_users():
+def read_users(
+    skip: int = 0, limit: int = 100, session: Session = Depends(get_session)
+):
+    users = session.scalars(select(User).offset(skip).limit(limit)).all
     return {
-        "users": database
+        "users": users
     }
 
 
