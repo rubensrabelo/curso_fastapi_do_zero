@@ -64,7 +64,7 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
 def read_users(
     skip: int = 0, limit: int = 100, session: Session = Depends(get_session)
 ):
-    users = session.scalars(select(User).offset(skip).limit(limit)).all
+    users = session.scalars(select(User).offset(skip).limit(limit)).all()
     return {
         "users": users
     }
@@ -75,14 +75,15 @@ def read_users(
         status_code=status.HTTP_200_OK,
         response_model=UserPublic
 )
-def read_user(user_id: int):
-    if user_id > len(database) or user_id < 1:
+def read_user(user_id: int, session: Session = Depends(get_session)):
+    db_user = session.scalar(select(User).where(User.id == user_id))
+
+    if not db_user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail='User not found'
         )
-    user_data = database[user_id - 1]
-    return user_data
+
+    return db_user
 
 
 @app.put(

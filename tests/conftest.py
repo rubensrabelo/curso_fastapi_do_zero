@@ -2,11 +2,12 @@ import pytest
 from fastapi.testclient import TestClient
 from contextlib import contextmanager
 from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from datetime import datetime
 import sys
 import os
+import time
 
 sys.path.insert(
     0,
@@ -37,11 +38,23 @@ def session():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool
     )
+
     table_registry.metadata.create_all(engine)
 
-    with Session(engine) as session:
-        yield session
+    TestingSessionLocal = sessionmaker(
+        bind=engine,
+        autoflush=False,
+        autocommit=False
+    )
 
+    with TestingSessionLocal() as session:
+        yield session
+        session.commit()
+        session.close() 
+
+    time.sleep(0.5)
+
+    engine.dispose()
     table_registry.metadata.drop_all(engine)
 
 

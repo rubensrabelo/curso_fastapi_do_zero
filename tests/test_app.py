@@ -7,7 +7,7 @@ sys.path.insert(
     os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     )
 
-from models import UserPublic  # noqa: E402
+from schemas import UserPublic  # noqa: E402
 
 
 def test_root_should_return_ok_and_hello_world(client):
@@ -35,6 +35,34 @@ def test_create_user(client):
     }
 
 
+def test_create_user_409_username_already_exists(client, user):
+    response = client.post(
+        "/users/",
+        json={
+            "username": user.username,
+            "email": "alice@example.com",
+            "password": "secret"
+        }
+    )
+
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json() == {"detail": "Username already exists"}
+
+
+def test_create_user_409_email_already_exists(client, user):
+    response = client.post(
+        "/users/",
+        json={
+            "username": "alice",
+            "email": user.email,
+            "password": "secret"
+        }
+    )
+
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json() == {"detail": "Email already exists"}
+
+
 def test_read_users(client):
     response = client.get("/users/")
     assert response.status_code == HTTPStatus.OK
@@ -48,14 +76,14 @@ def test_read_users_with_users(client, user):
     assert response.json() == {"users": [user_schema]}
 
 
-def test_read_user_by_id(client):
-    response = client.get("/users/1")
+def test_read_user_by_id(client, user):
+    response = client.get(f"/users/{user.id}")
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-                "username": "alice",
-                "email": "alice@example.com",
-                "id": 1
+                "username": user.username,
+                "email": user.email,
+                "id": user.id
             }
 
 
