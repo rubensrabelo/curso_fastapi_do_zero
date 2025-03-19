@@ -1,11 +1,11 @@
 from http import HTTPStatus
-import sys
-import os
+# import sys
+# import os
 
-sys.path.insert(
-    0,
-    os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    )
+# sys.path.insert(
+#     0,
+#     os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+#     )
 
 from schemas import UserPublic  # noqa: E402
 
