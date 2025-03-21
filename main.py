@@ -7,6 +7,7 @@ from starlette import status
 from database import get_session
 from models import User
 from schemas import Message, UserPublic, UserSchema, UserList
+from security import get_password_hash
 
 app = FastAPI()
 
@@ -46,8 +47,10 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
                 detail="Email already exists"
             )
 
+    hashed_password = get_password_hash(user.password)
+
     db_user = User(
-        username=user.username, password=user.password, email=user.email
+        username=user.username, password=hashed_password, email=user.email
     )
     session.add(db_user)
     session.commit()
