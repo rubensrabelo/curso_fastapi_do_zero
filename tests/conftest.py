@@ -17,6 +17,7 @@ sys.path.insert(
 from main import app  # noqa: E402
 from database import get_session  # noqa: E402
 from models import table_registry, User  # noqa: E402
+from security import get_password_hash
 
 
 @pytest.fixture
@@ -80,9 +81,16 @@ def mock_db_time():
 
 @pytest.fixture
 def user(session):
-    user = User(username='Teste', email='teste@test.com', password='testtest')
+    password = "testtest"
+    user = User(
+        username="Teste",
+        email="teste@test.com",
+        password=get_password_hash(password)
+    )
     session.add(user)
     session.commit()
     session.refresh(user)
+
+    user.clean_password = password
 
     return user
