@@ -17,7 +17,7 @@ sys.path.insert(
 from main import app  # noqa: E402
 from database import get_session  # noqa: E402
 from models import table_registry, User  # noqa: E402
-from security import get_password_hash
+from security import get_password_hash  # noqa: E402
 
 
 @pytest.fixture
@@ -51,7 +51,7 @@ def session():
     with TestingSessionLocal() as session:
         yield session
         session.commit()
-        session.close() 
+        session.close()
 
     time.sleep(0.5)
 
