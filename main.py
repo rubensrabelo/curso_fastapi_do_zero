@@ -8,7 +8,7 @@ from starlette import status
 from database import get_session
 from models import User
 from schemas import Message, UserPublic, UserSchema, UserList, Token
-from security import get_password_hash, create_access_token, verify_password
+from security import get_password_hash, create_access_token, verify_password, get_current_user
 
 app = FastAPI()
 
@@ -119,22 +119,24 @@ def read_user(user_id: int, session: Session = Depends(get_session)):
         response_model=UserPublic
 )
 def update_user(
-    user_id: int, user: UserSchema, session: Session = Depends(get_session)
+    user_id: int,
+    user: UserSchema,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
 ):
-    db_user = session.scalar(select(User).where(User.id == user_id))
-    if not db_user:
+    if current_user.id != user_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Not enough permissions'
         )
     try:
-        db_user.username = user.username
-        db_user.password = get_password_hash(user.password)
-        db_user.email = user.email
+        current_user.username = user.username
+        current_user.password = get_password_hash(user.password)
+        current_user.email = user.email
 
         session.commit()
-        session.refresh(db_user)
-        return db_user
+        session.refresh(current_user)
+        return current_user
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -144,16 +146,19 @@ def update_user(
 
 @app.delete(
         "/users/{user_id}",
-        response_model=Message
+        response_model=Message,
 )
-def delete_user(user_id: int, session: Session = Depends(get_session)):
-    db_user = session.scalar(select(User).where(User.id == user_id))
-    if not db_user:
+def delete_user(
+    user_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.id != user_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Not enough permissions'
         )
-    session.delete(db_user)
+    session.delete(current_user)
     session.commit()
     return {
         "message": "User deleted"
