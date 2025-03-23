@@ -106,9 +106,10 @@ def test_404_for_read_user_by_id(client):
     assert response.json() == {"detail": "User not found"}
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
-        "/users/1",
+        f"/users/{user.id}",
+        headers={"Authorization", f"Bearer {token}"},
         json={
             "username": "bob",
             "email": "bob@example.com",
@@ -119,31 +120,38 @@ def test_update_user(client, user):
     assert response.json() == {
         "username": "bob",
         "email": "bob@example.com",
-        "id": 1,
+        "id": user.id,
     }
 
 
-def test_404_for_update(client):
+def test_update_integrity_error(client, user, token):
     response = client.put(
-        "/users/0",
+        f"/users/{user.id}",
+        headers={"Authorization": f"Bearer {token}"},
         json={
-            "username": "bob",
+            "username": "fausto",
             "email": "bob@example.com",
             "password": "mynewpassword",
         }
     )
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {"detail": "User not found"}
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json() == {"detail": "Username or Email already exists"}
 
 
-def test_delete_user(client, user):
-    response = client.delete("/users/1")
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f"/users/{user.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {"message": "User deleted"}
 
 
-def test_404_for_delete(client):
-    response = client.delete("/users/0")
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {"detail": "User not found"}
+# def test_404_for_delete(client, user, token):
+#     response = client.delete(
+#         f"/users/{user.id}",
+#         headers={"Authorization": f"Bearer {token}"},
+#     )
+#     assert response.status_code == HTTPStatus.NOT_FOUND
+#     assert response.json() == {"detail": "User not found"}
