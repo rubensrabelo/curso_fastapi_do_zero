@@ -1,13 +1,7 @@
 from http import HTTPStatus
-# import sys
-# import os
 
-# sys.path.insert(
-#     0,
-#     os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-#     )
-
-from schemas import UserPublic  # noqa: E402
+from schemas import UserPublic
+from security import create_access_token
 
 
 def test_root_should_return_ok_and_hello_world(client):
@@ -155,3 +149,15 @@ def test_delete_user(client, user, token):
 #     )
 #     assert response.status_code == HTTPStatus.NOT_FOUND
 #     assert response.json() == {"detail": "User not found"}
+
+def test_get_current_user_not_found(client):
+    data = {'no-email': 'test'}
+    token = create_access_token(data)
+
+    response = client.delete(
+        '/users/1',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'Could not validate credentials'}
