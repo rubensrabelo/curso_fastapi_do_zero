@@ -117,20 +117,6 @@ def test_update_user(client, user, token):
         "id": user.id,
     }
 
-# Está dando no testes abaixo - ver isso depois
-# def test_update_integrity_error(client, user, token):
-#     response = client.put(
-#         f"/users/{user.id}",
-#         headers={"Authorization": f"Bearer {token['access_token']}"},
-#         json={
-#             "username": "fausto",
-#             "email": "bob@example.com",
-#             "password": "mynewpassword",
-#         }
-#     )
-#     assert response.status_code == HTTPStatus.CONFLICT
-#     assert response.json() == {"detail": "Username or Email already exists"}
-
 
 def test_delete_user(client, user, token):
     response = client.delete(
@@ -141,14 +127,6 @@ def test_delete_user(client, user, token):
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {"message": "User deleted"}
 
-
-# def test_404_for_delete(client, user, token):
-#     response = client.delete(
-#         f"/users/{user.id}",
-#         headers={"Authorization": f"Bearer {token}"},
-#     )
-#     assert response.status_code == HTTPStatus.NOT_FOUND
-#     assert response.json() == {"detail": "User not found"}
 
 def test_get_current_user_not_found(client):
     data = {'no-email': 'test'}
