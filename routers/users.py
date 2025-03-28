@@ -1,12 +1,13 @@
-from fastapi import Depends, APIRouter, HTTPException
+from fastapi import Depends, APIRouter, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from starlette import status
+from typing import Annotated
 
 from database import get_session
 from models import User
-from schemas import Message, UserPublic, UserSchema, UserList
+from schemas import Message, UserPublic, UserSchema, UserList, FilterPage
 from security import get_password_hash, get_current_user
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -54,9 +55,13 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
         response_model=UserList
 )
 def read_users(
-    skip: int = 0, limit: int = 100, session: Session = Depends(get_session)
+    filter_users: Annotated[FilterPage, Query()],
+    session: Session = Depends(get_session)
 ):
-    users = session.scalars(select(User).offset(skip).limit(limit)).all()
+    users = (session.scalars(select(User)
+                             .offset(filter_users.offset)
+                             .limit(filter_users.limit))
+                             .all())
     return {
         "users": users
     }
